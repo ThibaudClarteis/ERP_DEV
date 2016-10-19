@@ -1,0 +1,47 @@
+# ERP_DEV
+Hello Team, 
+Here is a code to add in ERPNext. 
+I would like to compare each purchase delivery expected date with the purchase receipt date.
+And then make a date diff to see if the delivery was on time, or late
+And then, if it was late, say that the delivery time was not conform.
+The same for the product complience, if delivery has been complete, means delivery is conform, if not delivery is not conform.
+Thank you for the support. 
+
+
+Select
+               po.name as "Purchase Order:Link/Purchase Order:120",
+               pr.name as “Purchase Receipt:Link/Purchase Receipt:120”,
+               po.transaction_date as "Transaction Date:Date:140",
+               po.supplier as "Supplier:Link/Supplier:130",
+               po_item.base_amount as "Amount:Currency:120",
+               po.total_taxes_and_charges as “Taxes:Currency:120”
+               po.grand_total as “Grand Total:Currency:120”,
+               po_item.description as "Description::200",
+               po_item.schedule_date as "Reqd by Date:Date:110",
+               pr.bl as “BL::120”,
+               pr.bl_date as “Date BL:Date:140”
+               pr.posting_date as "Date:Date:140",
+               CASE
+                              WHEN pr.posting_date <> null
+                                            THEN DATEDIFF (day, po_item.schedule_date, pr.posting_date)
+                              ELSE DATEDIFF(day,po_item.schedule_date, GETDATE()),
+ENS AS "Delay::140",
+               CASE 
+WHEN DATEDIFF (day, po_item.schedule_date, pr.posting_date)<8
+                                            THEN ‘yes’
+                              ELSE ‘no’
+               END AS “Delay compliance::120”, 
+               CASE
+                              WHEN pr_item.qty=pr_item.received_qty and pr_item.accepted_qty=po_item.qty
+                                            THEN ‘yes’
+                              ELSE ‘no’
+               END AS “Product compliance::120”, 
+               pr.owner as “Created by::140”,
+ 
+from
+               `tabPurchase Order` po, `tabPurchase Order Item` po_item, `tabSupplier` sup, `tabPurchase Receipt` pr, `tabPurchase Receipt item` pr_item,
+where
+               po.name = po_item.parent and po.supplier = sup.name and pr.name=pr_item.parent
+order by po.name desc
+
+Erp files 
